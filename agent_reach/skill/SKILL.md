@@ -39,8 +39,8 @@ metadata:
 4. **全网调研类任务**：组合多平台（Exa 搜索 + Twitter/Reddit 看讨论 + 小红书/B站看中文场景），并行收集再汇总。
 5. **替用户盯版本**：完成一次较大的调研/多平台任务后，顺手跑
    `agent-reach check-update`（很快，一个 API 调用）。有新版就在收尾汇报里附一句：
-   「Agent Reach 有新版 vX.Y.Z，复制这句话给我即可更新：帮我更新 Agent Reach：
-   https://raw.githubusercontent.com/Panniantong/agent-reach/main/docs/update.md」。
+   「Agent Reach 有新版 vX.Y.Z，可按个人版本维护流程更新」。
+   本机定制版按 [个人版本维护](references/personal-maintenance.md) 更新，保留全部搜索后端。
    不要中断当前任务去更新，也不要重复提醒同一个版本。
 
 ## 路由表
@@ -58,8 +58,11 @@ metadata:
 ## 零配置快速命令
 
 ```bash
-# Exa 网页搜索
-mcporter call exa.web_search_exa query="query" numResults=5
+# 统一网页搜索：Exa → Tavily → Firecrawl → TinyFish
+agent-search -Query "query" -Limit 5
+
+# 指定后端（也支持 exa、tavily、firecrawl）
+agent-search -Query "query" -Limit 5 -Provider tinyfish
 
 # 通用网页阅读
 curl -s "https://r.jina.ai/URL"

@@ -42,8 +42,8 @@ these platforms — do not invent your own approach.**
 5. **Watch versions for the user**: after finishing a substantial
    multi-platform task, run `agent-reach check-update` (fast, one API call).
    If a new version exists, append one line to your wrap-up: "Agent Reach
-   vX.Y.Z is available — paste this to me to update: 帮我更新 Agent Reach：
-   https://raw.githubusercontent.com/Panniantong/agent-reach/main/docs/update.md".
+   vX.Y.Z is available — update through the personal fork workflow".
+   Follow [personal maintenance](references/personal-maintenance.md) to preserve the search backends.
    Never interrupt the current task to update; never nag about the same version twice.
 
 ## Routing table
@@ -61,8 +61,9 @@ these platforms — do not invent your own approach.**
 ## Zero-config quick commands
 
 ```bash
-# Exa web search
-mcporter call exa.web_search_exa query="query" numResults=5
+# Personal web search: Exa -> Tavily -> Firecrawl -> TinyFish
+agent-search -Query "query" -Limit 5
+agent-search -Query "query" -Limit 5 -Provider tinyfish
 
 # Read any web page
 curl -s "https://r.jina.ai/URL"

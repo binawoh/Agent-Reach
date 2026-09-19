@@ -29,6 +29,19 @@ mcporter call web-reader.webReader url="https://example.com" return_format="text
 
 **适用场景**: 需要更精确控制输出格式时使用。
 
+## TinyFish Fetch / Agent
+
+用户指定 TinyFish，或普通阅读器无法取得正文时，使用已认证的 CLI：
+
+```powershell
+tinyfish fetch content get --format markdown "https://example.com/article"
+# 需要动态交互或结构化提取时再升级为 Agent
+tinyfish agent run --url "https://news.ycombinator.com/" "Read the current rank-1 story. Return JSON with title, article_url, discussion_url, points and comments. Do not vote or post."
+```
+
+Agent 成功的最终事件为 `type=COMPLETE`、`status=COMPLETED`，结果在 `resultJson`。
+登录页、验证码和空结果不算读取成功，应如实说明。认证与安装见 [搜索工具](search.md)。
+
 ## RSS (feedparser)
 
 ```python
@@ -47,4 +60,6 @@ for e in feedparser.parse('FEED_URL').entries[:5]:
 |-----|---------|
 | 通用网页 | Jina Reader (`curl r.jina.ai`) |
 | 需要图片/格式控制 | web-reader MCP |
+| 指定 TinyFish / 普通阅读器正文不完整 | TinyFish Fetch |
+| 动态交互与结构化提取 | TinyFish Agent |
 | RSS 订阅 | feedparser |

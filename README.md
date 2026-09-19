@@ -1,3 +1,5 @@
+> 本仓库是个人定制版：保留四个搜索后端，并自动合并上游。安装、更新和换机请看 [个人版本说明](docs/personal-fork.md)。
+
 <h1 align="center">👁️ Agent Reach</h1>
 
 <p align="center">

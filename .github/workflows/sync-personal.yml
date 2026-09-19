@@ -1,0 +1,60 @@
+name: Sync upstream with personal customizations
+
+on:
+  schedule:
+    - cron: '23 */6 * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: personal-upstream-sync
+  cancel-in-progress: false
+
+jobs:
+  sync:
+    if: github.repository == 'binawoh/Agent-Reach'
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 0
+      - name: Merge upstream without replacing personal commits
+        id: merge
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git fetch https://github.com/Panniantong/Agent-Reach.git main
+          upstream_sha=$(git rev-parse FETCH_HEAD)
+          if git merge-base --is-ancestor "$upstream_sha" HEAD; then
+            echo 'changed=false' >> "$GITHUB_OUTPUT"
+            echo 'Upstream is already included; personal commits are preserved.' >> "$GITHUB_STEP_SUMMARY"
+          else
+            if ! git merge --no-ff --no-commit "$upstream_sha"; then
+              git merge --abort
+              echo '::error::Upstream conflicts with personal changes. Resolve manually; nothing was pushed.'
+              exit 1
+            fi
+            echo 'changed=true' >> "$GITHUB_OUTPUT"
+          fi
+      - uses: actions/setup-python@v5
+        if: steps.merge.outputs.changed == 'true' || github.event_name == 'workflow_dispatch'
+        with:
+          python-version: '3.12'
+      - name: Install test dependencies
+        if: steps.merge.outputs.changed == 'true' || github.event_name == 'workflow_dispatch'
+        run: python -m pip install -c constraints.txt -e '.[dev]'
+      - name: Test merged source and personal search/deployment
+        if: steps.merge.outputs.changed == 'true' || github.event_name == 'workflow_dispatch'
+        run: python -m pytest -q
+      - name: Save tested merge to this fork only
+        if: steps.merge.outputs.changed == 'true'
+        run: |
+          git commit -m 'chore: merge upstream while preserving personal customizations'
+          git push origin HEAD:main
+          echo 'Tests passed; upstream merged into personal main without a PR.' >> "$GITHUB_STEP_SUMMARY"

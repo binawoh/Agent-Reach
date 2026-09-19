@@ -2239,13 +2239,12 @@ def _github_get_with_retry(url, timeout=10, retries=3, sleeper=time.sleep):
     return None, "unknown", retries
 
 
-#: Full update = package + upstream tools + skill. The one-liner walks an
-#: agent through all three (docs/update.md); bare pip only updates the package.
+#: Keep the package, skill and personal search route on the same fork revision.
 _UPDATE_INSTRUCTIONS = (
-    "更新方式（推荐，复制这句话给你的 AI Agent，会完整更新本体+上游工具+skill）：\n"
-    "  帮我更新 Agent Reach：https://raw.githubusercontent.com/Panniantong/agent-reach/main/docs/update.md\n"
-    "仅更新本体（不含上游工具和 skill）：\n"
-    "  pip install --upgrade https://github.com/Panniantong/agent-reach/archive/main.zip"
+    "个人版本更新（保留 Exa/Tavily/Firecrawl/TinyFish 定制）：\n"
+    "  在个人仓库目录运行 ./scripts/update-personal.ps1\n"
+    "安装与换机说明：\n"
+    "  https://github.com/binawoh/Agent-Reach/blob/main/docs/personal-fork.md"
 )
 
 
@@ -2392,7 +2391,7 @@ def _cmd_watch():
             for line in release_body.strip().split("\n")[:10]:
                 print(f"    {line}")
         print("  更新（一句话发给 Agent 即可完整更新）：")
-        print("    帮我更新 Agent Reach：https://raw.githubusercontent.com/Panniantong/agent-reach/main/docs/update.md")
+        print("    按个人版本流程更新：https://github.com/binawoh/Agent-Reach/blob/main/docs/personal-fork.md")
 
 
 if __name__ == "__main__":

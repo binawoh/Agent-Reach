@@ -1,6 +1,37 @@
 # 搜索工具
 
-Exa AI 搜索引擎。
+本机统一命令按 **Exa → Tavily → Firecrawl → TinyFish** 自动降级。
+
+```powershell
+agent-search -Query "query" -Limit 5
+agent-search -Query "query" -Limit 5 -Provider tinyfish
+```
+
+可指定 `-Provider exa|tavily|firecrawl|tinyfish`；用户点名后端时直接指定它。
+输出为 JSON，`provider` 表明实际后端。前一个后端调用失败才尝试下一个，全部失败则报告原因。
+安装与换机按 [个人版本维护](personal-maintenance.md)，搜索脚本和本技能一起从仓库部署。
+
+## Tavily / Firecrawl / TinyFish
+
+- Tavily 读取 `TAVILY_API_KEY`，先读进程环境，Windows 上再读当前用户环境变量。
+- Firecrawl、TinyFish 复用各自 CLI 在本机保存的凭据，不把 key 写入技能或搜索脚本。
+- 不要在日志或回答中打印密钥；新电脑单独配置凭据。
+
+```powershell
+agent-search -Query "query" -Limit 5 -Provider tavily
+agent-search -Query "query" -Limit 5 -Provider firecrawl
+tinyfish search query "query" --include-domains "example.com" --page 0
+tinyfish doctor --pretty
+```
+
+TinyFish 的 `data.results` 按 `-Limit` 截取，单页默认最多 10 条；更多结果使用 CLI 的
+`--page`（从 0 开始）。需要正文时按 [网页阅读](web.md) 使用 Fetch，动态交互再用 Agent。
+新装的 MCP 工具要在 agent 重启后的新会话加载；当前会话没有工具时使用 CLI，不要重复安装。
+doctor 标为 `unattended_safe: false` 的修复由用户执行。Windows 旧进程可从当前用户环境
+重新载入 `TINYFISH_API_KEY`，不输出变量值。
+
+以上是个人版的附加搜索路由，`agent-reach doctor` 不会把它们列作新增原生 channel；
+用各工具自己的检查命令和实际搜索验证。
 
 ## Exa AI 搜索
 
@@ -32,5 +63,8 @@ mcporter call exa.web_search_exa query="library API code example" numResults=5
 | 工具 | 来源 | 适用场景 |
 |-----|------|---------|
 | Exa | agent-reach | 英文/技术/代码搜索 |
+| Tavily | 本机环境变量认证 | Exa 失败后的网页搜索备用 |
+| Firecrawl | 本机 CLI | 搜索与正文抓取 |
+| TinyFish | 本机 CLI / MCP | 搜索、Fetch 正文、Agent 动态网页提取 |
 | 智谱搜索 | my-mcp-tools | 中文搜索 |
 | GitHub 搜索 | agent-reach (dev.md) | 仓库/代码搜索 |
