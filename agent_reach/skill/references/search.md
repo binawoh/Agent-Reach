@@ -33,9 +33,14 @@ agent-search -Query "query" -Limit 5 -Provider tinyfish
 
    若缺少 Node.js/npm，先按当前系统准备运行环境。安装位置由环境决定；若安装成功但
    命令仍找不到，发现实际 npm 安装目录并修正当前进程 PATH 或使用实际入口，不反复安装。
-3. 用 `firecrawl --status` 检查认证，复用现有本机配置或 `FIRECRAWL_API_KEY`。
-   缺少认证时按当前 CLI 的 `firecrawl login --help` 引导配置；需要用户登录时说明具体步骤。
-   安装成功不代表已认证，不打印或提交密钥。
+3. **搜索前必须确认认证成功**：运行 `firecrawl --status`，复用现有本机配置或
+   `FIRECRAWL_API_KEY`。另一台电脑即使装好了 CLI，也要独立检查认证状态。
+   未认证时先完成认证，不能只提示缺少凭据就执行搜索。用 `firecrawl login --help`
+   确认当前版本支持的方式；已有 API key 时在本机安全配置，没有现成凭据时由 agent
+   启动浏览器登录，例如 `firecrawl login --method browser`。
+   若需要用户本人登录或授权，明确告知并等待完成，再重新运行 `firecrawl --status`；
+   确认已认证后才继续。等待用户登录不等于认证失败，不因此直接跳过 Firecrawl。
+   安装成功或登录命令已启动都不代表认证完成；不打印密钥，不将其写入 skill 或 Git。
 4. 执行原来的搜索确认可用。安装或认证确实受阻时报告具体原因；自动搜索可继续下一后端，
    用户指定 Firecrawl 时如实说明阻塞，不把其他后端的结果冒充 Firecrawl。
 
