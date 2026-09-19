@@ -18,6 +18,31 @@ agent-search -Query "query" -Limit 5 -Provider tinyfish
 
 ## Tavily / Firecrawl / TinyFish
 
+### Firecrawl CLI 准备
+
+准备调用 Firecrawl（包括通过统一搜索命令使用它）时，先完成以下检查：
+
+1. 用当前 shell 的命令发现机制检查 `firecrawl`，存在时运行 `firecrawl --version`。
+   CLI 已可用就直接复用，不重复安装或为此升级。
+2. 未安装时由 agent 先安装官方 CLI，再继续原任务：
+
+   ```bash
+   npm install -g firecrawl-cli
+   firecrawl --version
+   ```
+
+   若缺少 Node.js/npm，先按当前系统准备运行环境。安装位置由环境决定；若安装成功但
+   命令仍找不到，发现实际 npm 安装目录并修正当前进程 PATH 或使用实际入口，不反复安装。
+3. 用 `firecrawl --status` 检查认证，复用现有本机配置或 `FIRECRAWL_API_KEY`。
+   缺少认证时按当前 CLI 的 `firecrawl login --help` 引导配置；需要用户登录时说明具体步骤。
+   安装成功不代表已认证，不打印或提交密钥。
+4. 执行原来的搜索确认可用。安装或认证确实受阻时报告具体原因；自动搜索可继续下一后端，
+   用户指定 Firecrawl 时如实说明阻塞，不把其他后端的结果冒充 Firecrawl。
+
+安装命令来源：[Firecrawl 官方 CLI](https://github.com/firecrawl/cli#installation)。
+
+### 凭据与调用
+
 - Tavily 读取 `TAVILY_API_KEY`，先读进程环境，Windows 上再读当前用户环境变量。
 - Firecrawl、TinyFish 复用各自 CLI 在本机保存的凭据，不把 key 写入技能或搜索脚本。
 - 不要在日志或回答中打印密钥；新电脑单独配置凭据。

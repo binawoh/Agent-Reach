@@ -53,6 +53,9 @@ configuration at runtime. Do not assume a username, drive, checkout path or agen
 The bundled PowerShell search script is optional; call available public MCP/CLI/API
 interfaces directly or write an adapter while preserving the search order and keeping
 credentials local. A missing fixed directory is not a reason to reinstall.
+When Firecrawl CLI is needed but missing, install and verify it before searching;
+follow [Firecrawl CLI setup](references/search.md#firecrawl-cli-准备). Do not skip
+the backend just because its CLI has not been installed yet.
 
 | User intent | Category | Details |
 |---------|------|---------|

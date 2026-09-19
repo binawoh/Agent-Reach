@@ -34,6 +34,8 @@ metadata:
 确认可用能力和安装位置。必要时可自行编写适配代码，遵守下述搜索顺序和凭据规则。
 仓库附带的 `agent-search.ps1` 只是 PowerShell 参考实现；有合适的 MCP、CLI 或 API
 可直接调用，不要求安装统一命令，也不因缺少固定目录而重新安装。
+需要使用 Firecrawl CLI 时，未安装就先安装并验证，再执行搜索；具体见
+[Firecrawl CLI 准备](references/search.md#firecrawl-cli-准备)。不要仅因缺少 CLI 就跳过该后端。
 
 ## 常驻规则（全程适用）
 
