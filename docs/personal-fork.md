@@ -5,7 +5,7 @@
 
 ## 上游同步
 
-GitHub Actions 的 **Sync upstream with personal customizations** 每 6 小时检查上游
+GitHub Actions 的 **Sync upstream with personal customizations** 每周一 09:23（新加坡／北京时间）检查上游
 `Panniantong/Agent-Reach` 的 `main`，也支持在 Actions 页面手动运行。
 Git 合并保留个人提交；只有全量测试通过，才推送合并结果到 **binawoh/Agent-Reach**。
 发生冲突、测试失败或推送竞争时停止，不强推、不提 PR，完全不修改上游。

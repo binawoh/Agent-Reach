@@ -2,7 +2,7 @@ name: Sync upstream with personal customizations
 
 on:
   schedule:
-    - cron: '23 */6 * * *'
+    - cron: '23 1 * * 1'
   workflow_dispatch:
 
 permissions:
