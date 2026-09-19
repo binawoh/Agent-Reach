@@ -22,8 +22,8 @@ metadata:
 
 # Agent Reach — internet capability router
 
-16 platforms, multiple backends each. **When this skill exists, use it for
-these platforms — do not invent your own approach.**
+16 platforms, multiple backends each. Follow this skill's routing and public
+tool interfaces, adapting the invocation to the current environment.
 
 ## Standing rules (apply for the whole session)
 
@@ -48,6 +48,12 @@ these platforms — do not invent your own approach.**
 
 ## Routing table
 
+Discover the current skill location, loaded MCP tools, installed commands and their
+configuration at runtime. Do not assume a username, drive, checkout path or agent.
+The bundled PowerShell search script is optional; call available public MCP/CLI/API
+interfaces directly or write an adapter while preserving the search order and keeping
+credentials local. A missing fixed directory is not a reason to reinstall.
+
 | User intent | Category | Details |
 |---------|------|---------|
 | Web / code search | search | [references/search.md](references/search.md) |
@@ -61,7 +67,7 @@ these platforms — do not invent your own approach.**
 ## Zero-config quick commands
 
 ```bash
-# Personal web search: Exa -> Tavily -> Firecrawl -> TinyFish
+# Optional installed helper: Exa -> Tavily -> Firecrawl -> TinyFish
 agent-search -Query "query" -Limit 5
 agent-search -Query "query" -Limit 5 -Provider tinyfish
 

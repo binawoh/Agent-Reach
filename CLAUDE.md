@@ -3,7 +3,7 @@
 ## Project
 Agent Reach — Python CLI + library that gives AI agents read/search access to 13 internet platforms.
 Positioning: installer + doctor + config tool. NOT a wrapper — after install, agents call upstream tools directly.
-Repo: github.com/Panniantong/Agent-Reach | License: MIT | Version: 1.5.0
+Personal repo: github.com/binawoh/Agent-Reach | Upstream (read-only): github.com/Panniantong/Agent-Reach | License: MIT | Version: 1.5.0
 
 ## Commands
 - `pip install -e .` — Dev install
@@ -35,10 +35,10 @@ Repo: github.com/Panniantong/Agent-Reach | License: MIT | Version: 1.5.0
 - All upstream tool calls go through public API/CLI, never hack internals
 
 ## Rules
-- NEVER modify upstream open source projects' source code
+- Modify only this personal fork; never push to or open a PR against upstream
 - Agent Reach is a "glue layer" — only route and call, don't reimagine
 - Version in THREE places must match: `pyproject.toml`, `__init__.py`, `tests/test_cli.py`
-- Always new branch for changes, PR to main, never push to main directly
+- Maintain personal customizations on this fork's main, without PRs; preserve local work and never force-push
 - Run `pytest tests/ -v` before committing — all tests must pass
 - Cookie-based auth (Twitter, XHS): use Cookie-Editor export method only, no QR scan
 - XHS login: Cookie-Editor browser export only (QR will hang)

@@ -1,6 +1,5 @@
-"""Personal deployment isolation and observable search fallback behavior."""
+"""Observable behavior of the optional personal search adapter."""
 
-import importlib.util
 import json
 import shutil
 import subprocess
@@ -9,47 +8,6 @@ from pathlib import Path
 import pytest
 
 ROOT = Path(__file__).resolve().parents[1]
-spec = importlib.util.spec_from_file_location("deploy_personal", ROOT / "scripts/deploy_personal.py")
-deploy_module = importlib.util.module_from_spec(spec)
-spec.loader.exec_module(deploy_module)
-
-
-def test_deploy_resolves_new_home_preserves_credentials_and_is_idempotent(tmp_path, monkeypatch):
-    home = tmp_path / "different user"
-    codex = tmp_path / "custom codex"
-    monkeypatch.setenv("CODEX_HOME", str(codex))
-    credential = home / ".tinyfish/config.json"
-    credential.parent.mkdir(parents=True)
-    credential.write_text('{"test_placeholder": "leave alone"}', encoding="utf-8")
-    original = credential.read_bytes()
-
-    first = deploy_module.deploy(home)
-    assert (codex / "skills/agent-reach/SKILL.md").read_bytes() == (
-        ROOT / "agent_reach/skill/SKILL.md"
-    ).read_bytes()
-    assert (home / ".local/bin/agent-search.ps1").is_file()
-    assert credential.read_bytes() == original
-    assert first["changed_files"]
-    assert deploy_module.deploy(home)["changed_files"] == []
-    assert json.loads((home / ".agent-reach/personal-install.json").read_text())["source"] == str(ROOT)
-
-
-def test_deploy_preserves_link_and_unrelated_skill_file(tmp_path):
-    canonical = tmp_path / "canonical"
-    canonical.mkdir()
-    root = tmp_path / "skills"
-    root.mkdir()
-    link = root / "agent-reach"
-    try:
-        link.symlink_to(canonical, target_is_directory=True)
-    except OSError:
-        pytest.skip("directory symlinks unavailable")
-    unrelated = canonical / "personal-note.txt"
-    unrelated.write_text("keep", encoding="utf-8")
-    deploy_module.deploy(tmp_path / "home", [root], tmp_path / "commands")
-    assert link.is_symlink()
-    assert unrelated.read_text() == "keep"
-    assert (canonical / "SKILL.md").is_file()
 
 
 def run_search(script):

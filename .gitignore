@@ -13,10 +13,9 @@ build/
 .claude/settings.local.json
 uv.lock
 
-# Local credentials and machine-specific installation metadata
+# Local credentials
 .tinyfish/
 .xiaohongshu-cli/
 cookies.json
 xhs-cookies.json
 twitter.env
-personal-install.json

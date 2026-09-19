@@ -2242,7 +2242,7 @@ def _github_get_with_retry(url, timeout=10, retries=3, sleeper=time.sleep):
 #: Keep the package, skill and personal search route on the same fork revision.
 _UPDATE_INSTRUCTIONS = (
     "个人版本更新（保留 Exa/Tavily/Firecrawl/TinyFish 定制）：\n"
-    "  在个人仓库目录运行 ./scripts/update-personal.ps1\n"
+    "  让 Agent 按个人版本维护指引发现当前安装位置并更新\n"
     "安装与换机说明：\n"
     "  https://github.com/binawoh/Agent-Reach/blob/main/docs/personal-fork.md"
 )

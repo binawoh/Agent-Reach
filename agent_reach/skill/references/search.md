@@ -1,6 +1,10 @@
 # 搜索工具
 
-本机统一命令按 **Exa → Tavily → Firecrawl → TinyFish** 自动降级。
+默认按 **Exa → Tavily → Firecrawl → TinyFish** 依次搜索；用户点名后端时直接使用它。
+先发现当前可用的 MCP 工具、CLI 及已配置的凭据。后端不可用或调用失败才尝试下一个；
+全部失败就如实报告。可自行写适配代码，但只能调用工具的公开接口，不能虚构成功结果。
+
+若当前环境已有 `agent-search`，可以复用这个可选统一命令：
 
 ```powershell
 agent-search -Query "query" -Limit 5
@@ -9,7 +13,8 @@ agent-search -Query "query" -Limit 5 -Provider tinyfish
 
 可指定 `-Provider exa|tavily|firecrawl|tinyfish`；用户点名后端时直接指定它。
 输出为 JSON，`provider` 表明实际后端。前一个后端调用失败才尝试下一个，全部失败则报告原因。
-安装与换机按 [个人版本维护](personal-maintenance.md)，搜索脚本和本技能一起从仓库部署。
+没有该命令时直接调用发现的后端，或参考仓库的 `agent_reach/scripts/agent-search.ps1`。
+不要求把脚本放到某个固定目录。安装与换机按 [个人版本维护](personal-maintenance.md)。
 
 ## Tavily / Firecrawl / TinyFish
 

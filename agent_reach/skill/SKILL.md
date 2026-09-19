@@ -25,7 +25,15 @@ metadata:
 
 # Agent Reach — 互联网能力路由器
 
-16 平台、多后端。**本 skill 存在时必须用它访问这些平台，不要自己发明方案。**
+16 平台、多后端。使用本 skill 的路由和公开工具接口；具体调用方式按当前环境适配。
+
+## 环境发现
+
+本 skill 不绑定用户名、盘符、仓库目录或某一种 agent。先通过当前 skill 的实际位置、
+已加载的 MCP 工具、命令发现（如 `Get-Command` / `command -v`）及工具自身配置，
+确认可用能力和安装位置。必要时可自行编写适配代码，遵守下述搜索顺序和凭据规则。
+仓库附带的 `agent-search.ps1` 只是 PowerShell 参考实现；有合适的 MCP、CLI 或 API
+可直接调用，不要求安装统一命令，也不因缺少固定目录而重新安装。
 
 ## 常驻规则（全程适用）
 
@@ -58,7 +66,7 @@ metadata:
 ## 零配置快速命令
 
 ```bash
-# 统一网页搜索：Exa → Tavily → Firecrawl → TinyFish
+# 可选统一命令（存在时使用）：Exa → Tavily → Firecrawl → TinyFish
 agent-search -Query "query" -Limit 5
 
 # 指定后端（也支持 exa、tavily、firecrawl）
