@@ -1,29 +1,29 @@
 ---
 name: agent-reach
 description: >
-  MUST USE when user wants to research/search/look up/find anything on the
-  internet — e.g. "research this topic", "do a deep dive on X", "search the
-  web for X", "see what people say about X", "look this up".
-
-  Also MUST USE when user mentions any platform or shares any URL/link:
-  Twitter/X, Reddit, Facebook, Instagram, YouTube, GitHub, Bilibili, XiaoHongShu,
-  Xiaoyuzhou Podcast, LinkedIn/Boss直聘/jobs/recruiting, V2EX, Xueqiu (stocks), RSS.
-
-  16 platforms, multi-backend routing (OpenCLI / per-platform CLIs / APIs).
-  Zero config for 6 channels. Run `agent-reach doctor --json` to see which
-  backend serves each platform right now.
-
-  NOT for: writing reports/analysis/translation (this skill only FETCHES
-  internet content); posting/commenting/liking (write operations); platforms
-  that already have a dedicated skill installed (prefer that skill).
+  Route internet research, web search and URL reading to the current agent's
+  built-in tools, external search, platform-specific channels, page extraction
+  or host browser tools. Covers news, official sources, social posts, video
+  transcripts and RSS. Fetch and verify content; not for posting or other
+  write operations. Prefer a dedicated platform skill when one is available.
 metadata:
-  homepage: https://github.com/Panniantong/Agent-Reach
+  homepage: https://github.com/binawoh/Agent-Reach
 ---
 
 # Agent Reach — internet capability router
 
-16 platforms, multiple backends each. Follow this skill's routing and public
-tool interfaces, adapting the invocation to the current environment.
+Choose capabilities by task, then call public interfaces available in the current
+environment. Agent Reach is the router; Exa and other search services are backends.
+
+## Cost boundary
+
+Use only capabilities verified to be free or included without additional charges.
+An API key, balance or promotional credit does not prove this. **TinyFish is limited
+to free Search / Fetch. Never invoke its Agent, Agent Batch, Browser or browser-session
+creation through CLI, MCP, API or another skill.** Failed Fetch, promotional credits
+or a generic request to use TinyFish do not authorize paid features. If cost is unknown
+or the free allowance is exhausted, use another verified free channel or report the
+gap. Do not top up, upgrade or consume paid balance automatically.
 
 ## Standing rules (apply for the whole session)
 
@@ -36,47 +36,55 @@ tool interfaces, adapting the invocation to the current environment.
    before starting.
 3. **On failure, follow the retry chains in references/** — never guess
    commands.
-4. **For broad research tasks**: combine platforms (Exa for web search +
-   Twitter/Reddit for discussions + XiaoHongShu/Bilibili for Chinese
-   perspectives), collect in parallel, then synthesize.
-5. **Watch versions for the user**: after finishing a substantial
-   multi-platform task, run `agent-reach check-update` (fast, one API call).
-   If a new version exists, append one line to your wrap-up: "Agent Reach
-   vX.Y.Z is available — update through the personal fork workflow".
-   Follow [personal maintenance](references/personal-maintenance.md) to preserve the search backends.
-   Never interrupt the current task to update; never nag about the same version twice.
+4. **Expand to meet evidence needs**: start with primary sources; add relevant
+   social platforms when the task needs people's experiences. Stop when evidence
+   is sufficient. Stale results, unrelated pages and homepage-only links require
+   refinement or another channel even if the command succeeded; see [search](references/search.md).
+5. **Personal maintenance**: retain the fork's weekly upstream sync and follow
+   [personal maintenance](references/personal-maintenance.md) for local updates.
+   Do not add update checks or installations after each search.
 
 ## Routing table
 
-Discover the current skill location, loaded MCP tools, installed commands and their
-configuration at runtime. Do not assume a username, drive, checkout path or agent.
+Discover the current skill location, session-provided search/read/browser tools,
+loaded MCP tools, installed commands and their configuration at runtime. Discover
+only what this task needs. A host named Codex or Claude does not prove that search
+is available. Do not assume a username, drive, checkout path or agent.
 The bundled PowerShell search script is optional; call available public MCP/CLI/API
-interfaces directly or write an adapter while preserving the search order and keeping
+interfaces directly or write an adapter while preserving task-based routing and keeping
 credentials local. A missing fixed directory is not a reason to reinstall.
 When Firecrawl CLI is needed, install it if missing and complete authentication if
 unauthenticated. Verify authentication before searching;
 follow [Firecrawl CLI setup](references/search.md#firecrawl-cli-准备). Do not skip
 the backend just because its CLI has not been installed yet.
 
-| User intent | Category | Details |
+| User intent | Preferred capability | Details |
 |---------|------|---------|
-| Web / code search | search | [references/search.md](references/search.md) |
-| XiaoHongShu / Twitter / Bilibili / V2EX / Reddit / Facebook / Instagram | social | [references/social.md](references/social.md) |
-| Jobs / LinkedIn | career | [references/career.md](references/career.md) |
-| GitHub / code | dev | [references/dev.md](references/dev.md) |
-| Web pages / articles / RSS | web | [references/web.md](references/web.md) |
-| YouTube / Bilibili / podcast transcripts | video | [references/video.md](references/video.md) |
-| Xueqiu / stock quotes | finance | [references/finance.md](references/finance.md) |
+| General web search, newly published news/announcements | Built-in search; external search if unavailable or insufficient | [search](references/search.md) |
+| Official documents, technical sources, financial reports | Exa; cross-check with built-in search as needed | [search](references/search.md) |
+| Known URL, full text or tables | Built-in reader if sufficient; Firecrawl for full extraction | [web](references/web.md) |
+| Content requiring expansion, pagination or interaction | Existing host browser tools without additional charges | [web](references/web.md) |
+| XiaoHongShu / Twitter / Bilibili / V2EX / Reddit / Facebook / Instagram posts | Platform-specific channel | [social](references/social.md) |
+| Jobs / LinkedIn / Boss Zhipin | Platform-specific channel | [career](references/career.md) |
+| Exact GitHub repository / code lookup | GitHub tools | [dev](references/dev.md) |
+| YouTube / Bilibili / podcast transcripts | Transcript channel | [video](references/video.md) |
+| Xueqiu / stock quotes | Market or platform channel | [finance](references/finance.md) |
+| RSS | feedparser | [web](references/web.md) |
 
-## Zero-config quick commands
+Honor an explicitly requested provider. If blocked or insufficient, explain why
+another source is added and label it correctly. Tavily is an external search
+alternative; Firecrawl Search and TinyFish Search are also available as needed.
+Search, page extraction and browser-agent execution are different operations.
+
+## Common commands (select the capability first)
 
 ```bash
-# Optional installed helper: Exa -> Tavily -> Firecrawl -> TinyFish
-agent-search -Query "query" -Limit 5
+# Optional PowerShell external-search helper: select a provider for the task
+agent-search -Query "query" -Limit 5 -Provider exa
 agent-search -Query "query" -Limit 5 -Provider tinyfish
 
-# Read any web page
-curl -s "https://r.jina.ai/URL"
+# Extract text (complete CLI setup and authentication from search.md first)
+firecrawl scrape "https://example.com/article" --format markdown --only-main-content
 
 # GitHub search
 gh search repos "query" --sort stars --limit 10
@@ -124,6 +132,10 @@ opencli instagram user USERNAME -f yaml        # recent posts from one user
 
 ## Environment check
 
+If the command is missing from PATH, discover the actual package manager,
+environment or entry point; do not assume a named conda environment. Built-in
+search alone does not require this check.
+
 ```bash
 # Channel availability + which backend serves each platform
 agent-reach doctor --json
@@ -160,8 +172,10 @@ only when the user's task requires that platform, and require non-empty content.
 
 ## Workspace rules
 
-**Never create files in the agent workspace.** Use `/tmp/` for temporary
-output and `~/.agent-reach/` for persistent data.
+Use the system or workspace-designated temporary directory and clean up this
+task's intermediate files. Use actual tool config directories for persistent
+settings; place deliverables according to the user's workspace rules. Never put
+cookies, API keys or browser data in skills, source control, logs or responses.
 
 ## Detailed references
 
@@ -169,17 +183,17 @@ Read the matching file when you need specifics (commands above cover the
 common cases; references hold per-backend command groups, caveats, retry
 chains — note: reference docs are written in Chinese, commands are universal):
 
-- [Search](references/search.md) — Exa AI search
+- [Search](references/search.md) — built-in/external search and result validation
 - [Social](references/social.md) — XiaoHongShu, Twitter, Bilibili, V2EX, Reddit, Facebook, Instagram (multi-backend/login-backed groups)
 - [Career](references/career.md) — LinkedIn
 - [Dev](references/dev.md) — GitHub CLI
-- [Web](references/web.md) — Jina Reader, RSS
+- [Web](references/web.md) — built-in reading, Firecrawl, TinyFish Fetch, host browser, RSS
 - [Video](references/video.md) — YouTube, Bilibili, Xiaoyuzhou
 - [Finance](references/finance.md) — Xueqiu quotes, search and market content
 
 ## Configure a channel
 
 If a channel needs setup, fetch the install guide:
-https://raw.githubusercontent.com/Panniantong/agent-reach/main/docs/install.md
+https://raw.githubusercontent.com/binawoh/Agent-Reach/main/docs/install.md
 
 The user only provides cookies / one extension click; the agent does the rest.

@@ -1,6 +1,7 @@
 # 个人版本维护
 
-个人源码为 `binawoh/Agent-Reach` 的 `main`；保留 Exa、Tavily、Firecrawl、TinyFish 搜索路由。
+个人源码为 `binawoh/Agent-Reach` 的 `main`；保留按任务选择内置工具、外部搜索和平台通道的路由。
+同步后仍须保留 SKILL.md 的费用限制：TinyFish 仅免费 Search/Fetch，禁用 Agent/Batch/Browser。
 仓库位置、skill 安装目录、运行环境和调用脚本均由执行任务的 agent 自行发现，不固定路径。
 
 更新或换机时：
@@ -11,7 +12,12 @@
    上游 `Panniantong/Agent-Reach` 只读；不向其推送，也不提交 PR。
 3. 按当前 agent 的实际技能加载方式更新 `SKILL.md` 和配套 references，保留目录链接及无关文件。
    需要更新 Agent Reach CLI 时，先识别现有包管理方式，再从个人源码安装。适配代码可现场编写。
-4. 发现可用搜索后端并执行真实搜索验证。PowerShell 参考脚本可复用，也可直接使用 MCP/CLI/API；
+   若另装了 `use-tinyfish`，用本仓库的 [免费版技能模板](tinyfish-free-only.md) 更新其本机
+   `SKILL.md`，保留目录链接及其他文件；未安装则无需新增。其他独立 TinyFish skill 也须移除
+   升级 Agent/Batch/Browser 的指引和示例。不改包管理器缓存或第三方上游；重装后重新检查，
+   避免恢复付费回退。模板保存在个人仓库，换机时直接复用，不依赖旧电脑路径。
+4. 发现当前会话的内置搜索/读取/浏览器能力及任务需要的外部后端，在允许的免费范围内验证。
+   不为验收启用付费功能。PowerShell 参考脚本可复用，也可直接使用 MCP/CLI/API；
    不要求安装特定入口命令。新装 MCP 在新会话加载，不反复安装。
    使用 Firecrawl 前按 [准备流程](search.md#firecrawl-cli-准备) 检查：未安装先安装，
    未认证先完成本机认证，验证通过后再搜索；不能沿用另一台电脑的认证成功结论。

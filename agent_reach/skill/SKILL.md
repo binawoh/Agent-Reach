@@ -1,37 +1,34 @@
 ---
 name: agent-reach
 description: >
-  MUST USE when user wants to 调研/research/搜索/search/查/找/look up anything
-  on the internet — e.g. 全网调研 X / 帮我调研一下 X / 查一下 X / 搜搜 X /
-  看看大家怎么评价 X / X 上有什么讨论 / research this topic。
-
-  Also MUST USE when user mentions any platform or shares any URL/链接:
-  小红书/xiaohongshu/xhs, Twitter/推特/X, B站/bilibili, Reddit, Facebook,
-  Instagram, V2EX, LinkedIn/领英/Boss直聘/招聘/求职/jobs, YouTube, GitHub code search, 小宇宙播客,
-  雪球/股票行情, RSS feeds, or any web URL.
-
-  16 platforms, multi-backend routing (OpenCLI / per-platform CLIs / APIs).
-  Zero config for 6 channels. Run `agent-reach doctor --json` to see which
-  backend serves each platform right now.
-
-  NOT for: 写报告/数据分析/翻译等内容加工（本 skill 只负责从互联网获取内容）；
-  发帖/评论/点赞等写操作；已有专门 skill 的平台（先用专门 skill）。
-
-  【路由方式】SKILL.md 包含路由表和常用命令，复杂场景需按需阅读对应分类的 references/*.md。
-  分类：search / social (小红书/推特/B站/V2EX/Reddit/Facebook/Instagram) / career(LinkedIn/Boss直聘) / dev(github) / web(网页/文章/RSS) / video(YouTube/B站/播客) / finance(雪球/股票)。
+  搜索、调研和读取互联网内容时，按任务选择当前 Agent 的内置搜索、Exa 等外部搜索、
+  平台专用通道、正文抓取或宿主浏览器工具。适用于网页/新闻/官方资料查询、URL 阅读、
+  小红书/B站/Twitter/Reddit 等站内内容、视频字幕和 RSS。
+  只负责获取与核验内容，不负责发帖、评论等写操作；已有专门平台 skill 时优先使用它。
 metadata:
-  homepage: https://github.com/Panniantong/Agent-Reach
+  homepage: https://github.com/binawoh/Agent-Reach
 ---
 
 # Agent Reach — 互联网能力路由器
 
-16 平台、多后端。使用本 skill 的路由和公开工具接口；具体调用方式按当前环境适配。
+本 skill 负责选择和组合互联网工具，Exa 等只是其中的后端。先按任务选择能力，
+再调用当前环境的公开接口；不把所有请求都交给同一个搜索引擎。
+
+## 费用限制
+
+只使用已确认免费或不会产生额外费用的能力；有 API key、余额或赠送额度不等于免费。
+**TinyFish 仅允许免费范围内的 Search / Fetch；禁止调用 Agent、Agent Batch、Browser
+或创建浏览器会话，包括 CLI、MCP、API 及其他 skill 的同等入口。** 不因 Fetch 失败、
+已有赠送余额或用户泛称“用 TinyFish”就启用付费功能。无法确认费用或免费额度用尽时，
+换已确认免费的通道；没有可用通道则说明缺口，不自动充值、升级或消费付费余额。
 
 ## 环境发现
 
 本 skill 不绑定用户名、盘符、仓库目录或某一种 agent。先通过当前 skill 的实际位置、
-已加载的 MCP 工具、命令发现（如 `Get-Command` / `command -v`）及工具自身配置，
-确认可用能力和安装位置。必要时可自行编写适配代码，遵守下述搜索顺序和凭据规则。
+当前会话暴露的内置搜索/网页读取/浏览器工具、已加载的 MCP 工具、命令发现
+（如 `Get-Command` / `command -v`）及工具自身配置，确认可用能力和安装位置。
+只发现当前任务需要的工具，不必先体检或配置全部后端；不得因宿主叫 Codex 或 Claude
+就假定它有搜索权限。必要时可自行编写适配代码，遵守任务路由和凭据规则。
 仓库附带的 `agent-search.ps1` 只是 PowerShell 参考实现；有合适的 MCP、CLI 或 API
 可直接调用，不要求安装统一命令，也不因缺少固定目录而重新安装。
 需要使用 Firecrawl CLI 时，未安装先安装，未认证先完成认证，验证通过后再搜索；具体见
@@ -46,36 +43,42 @@ metadata:
    按对应 reference 的「体检与恢复」runbook 重新确认（如 career.md 的 Boss直聘 CDP 排查）。
 2. **声明你在用什么**：开始干活前说一句「使用 agent-reach 的 X 平台 / Y 后端」。
 3. **失败按 references 里的重试链处理**，不要瞎猜命令。
-4. **全网调研类任务**：组合多平台（Exa 搜索 + Twitter/Reddit 看讨论 + 小红书/B站看中文场景），并行收集再汇总。
-5. **替用户盯版本**：完成一次较大的调研/多平台任务后，顺手跑
-   `agent-reach check-update`（很快，一个 API 调用）。有新版就在收尾汇报里附一句：
-   「Agent Reach 有新版 vX.Y.Z，可按个人版本维护流程更新」。
-   本机定制版按 [个人版本维护](references/personal-maintenance.md) 更新，保留全部搜索后端。
-   不要中断当前任务去更新，也不要重复提醒同一个版本。
+4. **按证据需要扩展**：全网调研先找原始资料；用户需要网友体验时再加入相关平台。
+   证据足够即可结束，不为凑工具数量重复搜索。只返回旧资料、无关结果或首页链接时，
+   即使命令成功，也要按 [搜索工具](references/search.md) 调整查询或换通道。
+5. **个人版本维护**：沿用个人仓库每周上游同步；本机更新按
+   [个人版本维护](references/personal-maintenance.md)。不在每次搜索后额外检查或安装更新。
 
 ## 路由表
 
-| 用户意图 | 分类 | 详细文档 |
+| 用户意图 | 首选能力 | 详细文档 |
 |---------|------|---------|
-| 网页搜索/代码搜索 | search | [references/search.md](references/search.md) |
-| 小红书/推特/B站/V2EX/Reddit/Facebook/Instagram | social | [references/social.md](references/social.md) |
-| 招聘/职位/LinkedIn/Boss直聘 | career | [references/career.md](references/career.md) |
-| GitHub/代码 | dev | [references/dev.md](references/dev.md) |
-| 网页/文章/RSS | web | [references/web.md](references/web.md) |
-| YouTube/B站/播客字幕 | video | [references/video.md](references/video.md) |
-| 雪球/股票行情 | finance | [references/finance.md](references/finance.md) |
+| 普通网页搜索、刚发布的新闻/公告 | 当前 Agent 内置搜索；缺失或结果不足时用外部搜索 | [search](references/search.md) |
+| 官方原文、技术文档、财报深入补充 | Exa；必要时与内置搜索交叉核验 | [search](references/search.md) |
+| 已知 URL、正文或表格 | 内置读取可满足时直接用；完整抓取优先 Firecrawl | [web](references/web.md) |
+| 展开/翻页/交互后才能读到内容 | 宿主已有且不额外收费的浏览器工具 | [web](references/web.md) |
+| 小红书/推特/B站/V2EX/Reddit/Facebook/Instagram 站内内容 | 对应平台通道 | [social](references/social.md) |
+| 招聘/职位/LinkedIn/Boss直聘 | 对应平台通道 | [career](references/career.md) |
+| 精确查 GitHub 仓库/代码 | GitHub 工具 | [dev](references/dev.md) |
+| YouTube/B站/播客字幕 | 字幕或转录通道 | [video](references/video.md) |
+| 雪球/股票行情 | 对应行情或站内通道 | [finance](references/finance.md) |
+| RSS | feedparser | [web](references/web.md) |
 
-## 零配置快速命令
+用户指定工具时优先执行指定工具；遇到不可用或结果不足，说明原因再补充其他来源，
+不得把备用结果冒充指定工具结果。Tavily 是外部搜索补充，Firecrawl Search 和 TinyFish
+Search 也可按需使用；这些搜索入口不等于正文抓取或浏览器 Agent。
+
+## 常用命令（先按上表选工具）
 
 ```bash
-# 可选统一命令（存在时使用）：Exa → Tavily → Firecrawl → TinyFish
-agent-search -Query "query" -Limit 5
+# 可选 PowerShell 外部搜索助手：明确指定任务所需后端
+agent-search -Query "query" -Limit 5 -Provider exa
 
 # 指定后端（也支持 exa、tavily、firecrawl）
 agent-search -Query "query" -Limit 5 -Provider tinyfish
 
-# 通用网页阅读
-curl -s "https://r.jina.ai/URL"
+# 抓取正文（先按 search.md 完成 CLI 安装与认证）
+firecrawl scrape "https://example.com/article" --format markdown --only-main-content
 
 # GitHub 搜索
 gh search repos "query" --sort stars --limit 10
@@ -143,12 +146,12 @@ opencli instagram user USERNAME -f yaml        # 读指定用户最近帖子
 
 ## 环境检查
 
-> 本机 Python 环境默认是 conda `dl`；若 `agent-reach` 不在 PATH，用
-> `conda run -n dl agent-reach ...` 前缀。
+`agent-reach` 不在 PATH 时，发现实际包管理器、虚拟环境或入口路径后调用，
+不要假定某个 conda 环境名。只使用内置搜索时不需要运行此检查。
 
 ```bash
 # 检查可用 channel 与每个平台当前激活的后端
-conda run -n dl agent-reach doctor --json
+agent-reach doctor --json
 ```
 
 ## OpenCLI 适配器发现
@@ -159,23 +162,25 @@ conda run -n dl agent-reach doctor --json
 
 ## 工作区规则
 
-**不要在 agent workspace 创建文件。** 使用 `/tmp/` 存放临时输出，`~/.agent-reach/` 存放持久数据。
+临时输出使用当前系统临时目录或工作区指定的临时位置，结束后清理本次中间文件。
+持久配置使用工具实际配置目录；用户要求交付的文件按其工作区规则保存。
+Cookie、API key 和浏览器数据不得写入 skill、源码仓库、日志或回答。
 
 ## 详细文档
 
 根据用户需求，阅读对应的详细文档：
 
-- [搜索工具](references/search.md) — Exa AI 搜索
+- [搜索工具](references/search.md) — 内置/外部搜索、结果验收与按需补充
 - [社交媒体](references/social.md) — 小红书, Twitter, B站, V2EX, Reddit, Facebook, Instagram（多后端/登录态命令组）
 - [职场招聘](references/career.md) — LinkedIn, Boss直聘
 - [开发工具](references/dev.md) — GitHub CLI
-- [网页阅读](references/web.md) — Jina Reader, RSS
+- [网页阅读](references/web.md) — 内置读取、Firecrawl、TinyFish Fetch、宿主浏览器、RSS
 - [视频播客](references/video.md) — YouTube, B站, 小宇宙
 - [金融行情](references/finance.md) — 雪球股票行情、搜索、热门内容
 
 ## 配置渠道
 
-如果某个 channel 需要配置，获取安装指南：
-https://raw.githubusercontent.com/Panniantong/agent-reach/main/docs/install.md
+如果某个 channel 需要配置，读取个人仓库的安装指南：
+https://raw.githubusercontent.com/binawoh/Agent-Reach/main/docs/install.md
 
 用户只需提供 cookies，其他配置由 agent 完成。

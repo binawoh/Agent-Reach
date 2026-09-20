@@ -244,7 +244,12 @@ class TestSkillCommand(unittest.TestCase):
             with open(target, encoding="utf-8") as f:
                 content = f.read()
             self.assertTrue(content.strip())
-            self.assertIn("Xiaoyuzhou Podcast, LinkedIn", content)
+            expected = (
+                importlib.resources.files("agent_reach")
+                .joinpath("skill", "SKILL_en.md")
+                .read_text(encoding="utf-8")
+            )
+            self.assertEqual(content, expected)
             self.assertNotIn("搜推特", content)
             self.assertTrue(
                 os.path.exists(os.path.join(skill_parent, "agent-reach", "references"))
