@@ -407,6 +407,8 @@ def skill_dir() -> Path:
 def _skill_lang() -> str:
     for var in ("AGENT_REACH_LANG", "LC_ALL", "LC_MESSAGES", "LANG"):
         v = os.environ.get(var, "").strip().lower()
+        if v.startswith("zh"):
+            return "zh"
         if v.startswith("en"):
             return "en"
     return "zh"

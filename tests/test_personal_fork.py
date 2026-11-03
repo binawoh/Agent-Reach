@@ -14,6 +14,7 @@ ROOT = Path(__file__).resolve().parents[1]
 def test_placed_skill_includes_personal_routes_and_current_channels(monkeypatch, lang):
     from agent_reach.runtime import manage
 
+    monkeypatch.setenv("LC_ALL", "en_US.UTF-8" if lang == "zh" else "zh_CN.UTF-8")
     monkeypatch.setenv("AGENT_REACH_LANG", lang)
     manage.place_skill()
     installed = manage.skill_dir()
