@@ -11,7 +11,7 @@
 2. 只从个人 `main` 获取更新；已有克隆使用快进拉取，遇到本地改动或分叉先处理，不覆盖。
    上游 `Panniantong/Agent-Reach` 只读；不向其推送，也不提交 PR。
 3. 按当前 agent 的实际技能加载方式更新 `SKILL.md` 和配套 references，保留目录链接及无关文件。
-   需要更新 Agent Reach CLI 时，先识别现有包管理方式，再从个人源码安装。适配代码可现场编写。
+   需要更新 Agent Reach CLI 时，先识别现有包管理方式，再从个人源码安装。1.6 的具体安装和迁移命令见[个人仓库安装指南](https://github.com/binawoh/Agent-Reach/blob/main/docs/install.md)。适配代码可现场编写。
    若另装了 `use-tinyfish`，用本仓库的 [免费版技能模板](tinyfish-free-only.md) 更新其本机
    `SKILL.md`，保留目录链接及其他文件；未安装则无需新增。其他独立 TinyFish skill 也须移除
    升级 Agent/Batch/Browser 的指引和示例。不改包管理器缓存或第三方上游；重装后重新检查，

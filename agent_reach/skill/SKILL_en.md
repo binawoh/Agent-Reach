@@ -6,14 +6,17 @@ description: >
   or host browser tools. Covers news, official sources, social posts, video
   transcripts and RSS. Fetch and verify content; not for posting or other
   write operations. Prefer a dedicated platform skill when one is available.
+  Also use for Agent Reach installation, status, channel management and updates.
 metadata:
   homepage: https://github.com/binawoh/Agent-Reach
+  version: "{{VERSION}}"
 ---
 
-# Agent Reach — internet capability router
+# Agent Reach
 
-Choose capabilities by task, then call public interfaces available in the current
-environment. Agent Reach is the router; Exa and other search services are backends.
+One command for every platform: `agent-reach`. Read-only; prints one JSON object by default.
+
+Before acting, say "using the agent-reach skill (channel X)". Once invoked, these rules apply for the whole session.
 
 ## Cost boundary
 
@@ -24,27 +27,6 @@ creation through CLI, MCP, API or another skill.** Failed Fetch, promotional cre
 or a generic request to use TinyFish do not authorize paid features. If cost is unknown
 or the free allowance is exhausted, use another verified free channel or report the
 gap. Do not top up, upgrade or consume paid balance automatically.
-
-## Standing rules (apply for the whole session)
-
-1. **Health-check before acting**: for multi-backend/login-backed platforms (XiaoHongShu /
-   Reddit / Bilibili / Twitter / Facebook / Instagram), run `agent-reach doctor --json` first.
-   Use a populated `active_backend`; `active_backend: null` means Doctor deliberately skipped a
-   live probe to avoid browser-cookie reads or remote writes, not that no backend exists. Only when
-   the user's task requires that platform, run the reference's read-only command to verify it.
-2. **Announce what you use**: say "using agent-reach, platform X via backend Y"
-   before starting.
-3. **On failure, follow the retry chains in references/** — never guess
-   commands.
-4. **Expand to meet evidence needs**: start with primary sources; add relevant
-   social platforms when the task needs people's experiences. Stop when evidence
-   is sufficient. Stale results, unrelated pages and homepage-only links require
-   refinement or another channel even if the command succeeded; see [search](references/search.md).
-5. **Personal maintenance**: retain the fork's weekly upstream sync and follow
-   [personal maintenance](references/personal-maintenance.md) for local updates.
-   Do not add update checks or installations after each search.
-
-## Routing table
 
 Discover the current skill location, session-provided search/read/browser tools,
 loaded MCP tools, installed commands and their configuration at runtime. Discover
@@ -58,142 +40,88 @@ unauthenticated. Verify authentication before searching;
 follow [Firecrawl CLI setup](references/search.md#firecrawl-cli-准备). Do not skip
 the backend just because its CLI has not been installed yet.
 
-| User intent | Preferred capability | Details |
-|---------|------|---------|
-| General web search, newly published news/announcements | Built-in search; external search if unavailable or insufficient | [search](references/search.md) |
-| Official documents, technical sources, financial reports | Exa; cross-check with built-in search as needed | [search](references/search.md) |
-| Known URL, full text or tables | Built-in reader if sufficient; Firecrawl for full extraction | [web](references/web.md) |
-| Content requiring expansion, pagination or interaction | Existing host browser tools without additional charges | [web](references/web.md) |
-| XiaoHongShu / Twitter / Bilibili / V2EX / Reddit / Facebook / Instagram posts | Platform-specific channel | [social](references/social.md) |
-| Jobs / LinkedIn / Boss Zhipin | Platform-specific channel | [career](references/career.md) |
-| Exact GitHub repository / code lookup | GitHub tools | [dev](references/dev.md) |
-| YouTube / Bilibili / podcast transcripts | Transcript channel | [video](references/video.md) |
-| Xueqiu / stock quotes | Market or platform channel | [finance](references/finance.md) |
-| RSS | feedparser | [web](references/web.md) |
+Use the host's search for current news, Exa for primary and technical sources, GitHub search for exact repository or code lookups, and Tavily, Firecrawl Search or free TinyFish Search when coverage is insufficient. For a known URL, try the host reader, Firecrawl or free TinyFish Fetch. Use the host browser for interactive pages and feedparser for RSS. Prefer an available dedicated platform skill for site actions. Honor an explicitly requested tool and identify any fallback. See [Search](references/search.md), [Reading and RSS](references/web.md) and [Personal updates](references/personal-maintenance.md).
 
-Honor an explicitly requested provider. If blocked or insufficient, explain why
-another source is added and label it correctly. Tavily is an external search
-alternative; Firecrawl Search and TinyFish Search are also available as needed.
-Search, page extraction and browser-agent execution are different operations.
+## Choosing a route
 
-## Common commands (select the capability first)
+- For public content, use your own search/read tools first (optionally `site:domain`). Check body text, comments and subtitles separately; when they are enough, answer directly without adding channels or logging in.
+- Use Reach when your tools are unavailable, the result lacks what the user needs, or the user wants a site action a channel declares. Unsure of actions and params? Run `agent-reach channels`.
+- An added channel (a default one, or one added with `add`) sends search/read straight to its site tool. For channels not added yet, search/read first try anonymous public web access; results mark it with `backend: public-web`. `--backend public-web` limits to public web; `--backend <backend>` picks a site tool.
+- A platform name or link only identifies the source; it never triggers install or login by itself.
+- Snippets, page shells, comment counts and subtitle track lists are not body text, comments or subtitles; say which you have. If the user skips login, still deliver the public results already gathered.
 
 ```bash
-# Optional PowerShell external-search helper: select a provider for the task
-agent-search -Query "query" -Limit 5 -Provider exa
-agent-search -Query "query" -Limit 5 -Provider tinyfish
-
-# Extract text (complete CLI setup and authentication from search.md first)
-firecrawl scrape "https://example.com/article" --format markdown --only-main-content
-
-# GitHub search
-gh search repos "query" --sort stars --limit 10
-
-# YouTube subtitles (never use yt-dlp for Bilibili; retry chain in video.md)
-yt-dlp --write-sub --write-auto-sub --skip-download -o "/tmp/%(id)s" "URL"
-
-# V2EX hot topics
-curl -s "https://www.v2ex.com/api/topics/hot.json" -H "User-Agent: agent-reach/1.0"
-
-# Bilibili search (bili-cli, no login needed)
-bili search "query" --type video -n 5
+agent-reach channels                      # actions and params per channel
+agent-reach <channel> <action> [args]     # e.g. agent-reach bilibili search "rust async" --limit 5
+agent-reach read <url>                    # picks the channel from the URL
 ```
 
-## Login-backed platforms (pick by doctor's active_backend)
+## Results and errors
 
-Twitter boundary: cookies saved by `agent-reach configure twitter-cookies`
-are used only by `doctor` to check whether explicit credentials are present.
-`doctor` does not run `twitter status` or configure the current shell. Before
-calling `twitter` directly, explicitly provide `TWITTER_AUTH_TOKEN` and
-`TWITTER_CT0` in the child-process environment without logging their values.
+- `ok: true` → content in `items`; each has `title / url / author / published_at / text`, upstream data in `raw`.
+- `ok: false` → branch on `error.code` and follow `error.hint`:
 
-XiaoHongShu boundary: Agent Reach must not log the user in or read browser
-cookies. OpenCLI may use only an existing Chrome session explicitly controlled
-by the user. If none exists, do not automate login; use a manual Cookie-Editor
-export with xiaohongshu-mcp or a legacy tool instead.
+| error.code | What to do |
+|---|---|
+| `NEED_SETUP` | Missing dependency or key. Run `agent-reach add <channel>` as hinted; for a key, the user provides it, then `agent-reach configure <key>` |
+| `NEED_LOGIN` | Keep existing results and tell the user login is needed; `agent-reach login <channel>` opens the browser and the user logs in themselves. Never log in for them or ask for a password |
+| `UPSTREAM_BROKEN` | This platform is temporarily not working; `message` is what was reported. Tell the user which platform is unavailable and roughly why, by platform name, without naming tools; run `agent-reach update` once, after they agree, only if the message points to an outdated tool; never retry in a loop |
+| `TIMEOUT` | Check the failed stage and channel status (`agent-reach doctor --text`); do not retry or reopen windows in a loop |
+| `RATE_LIMITED` | The platform rate-limited; Reach paused the channel. Wait `retry_after_seconds`; do not switch backends |
+| `PLATFORM_BLOCKED` | The platform wants verification (captcha/risk check). Stop; the user resolves it on the official page. Do not switch accounts or backends |
+| `BUSY` | The browser stayed full for the 2-minute wait in line, or the user has a login window open. Retry later, or after the user says they are logged in; do not close the window or switch profiles |
+| `NOT_FOUND` | Content does not exist; check the link or ID |
+| `BAD_INPUT` | Wrong arguments; run `agent-reach channels` for usage |
 
-```bash
-# Twitter search (twitter-cli preferred; retry chain in social.md)
-twitter search "query" -n 10
+On `PLATFORM_BLOCKED`, `RATE_LIMITED`, `NEED_LOGIN` or `BUSY`, stop this attempt; do not retry with other accounts, backends or browsers. A network failure or a failure on one machine does not mean "the platform requires login".
 
-# Reddit (NO zero-config path — OpenCLI or rdt-cli, login required)
-opencli reddit search "query" -f yaml   # desktop
-rdt search "query" --limit 10            # legacy/server
+## Login and the dedicated browser
 
-# XiaoHongShu (desktop prefers OpenCLI)
-opencli xiaohongshu search "query" -f yaml
+All browser channels share one dedicated browser (CloakBrowser preferred, falling back to installed Chrome). It runs headless by default, closes after 10 idle minutes and reopens on the next call. Calls may run in parallel, including from subagents: up to 2 per platform and 4 in total run at once, the rest wait in line, and two searches on the same platform start at least 10 seconds apart.
 
-# Facebook / Instagram (desktop OpenCLI, browser session)
-opencli facebook search "query" -f yaml
-opencli facebook groups -f yaml
-opencli instagram search "query" -f yaml       # user search
-opencli instagram user USERNAME -f yaml        # recent posts from one user
-```
+The first time a site is used, if the user's Chrome is connected to the OpenCLI extension, that site's login is copied once into the dedicated browser and reused afterwards; only that site is copied and the source browser is untouched. Only when the login has expired or there is no source to copy from does the user run `agent-reach login <channel>` and log in themselves. Refreshing, choosing a source and logging out are in [Sessions](references/sessions.md): read it when the user wants to log in, log out or switch accounts, or on `NEED_LOGIN`.
 
-## Environment check
+## Platform notes
 
-If the command is missing from PATH, discover the actual package manager,
-environment or entry point; do not assume a named conda environment. Built-in
-search alone does not require this check.
+- Xiaohongshu read returns text descriptions only; never claim to understand the images or video.
+- When a Boss Zhipin search result has `salary_encoded=true`, never guess the salary digits; read the job link for the readable salary in the detail.
+- What each platform offers publicly and what Reach adds is in [Capability scope](references/capabilities.md): read it when the user asks "what can it get / is it complete" or you need to judge completeness.
 
-```bash
-# Channel availability + which backend serves each platform
-agent-reach doctor --json
-```
+## Channels
 
-When the user asks “help me configure Boss Zhipin” / “帮我配 Boss直聘”, read the
-Boss section in `references/career.md`. After explicit install approval, run
-`agent-reach install --env=local --system --channels=boss`, launch the dedicated
-loopback-only Chrome profile for their OS, then **pause and have the user visually
-confirm** the window is logged in (avatar in the top-right); if not, have them log
-in manually. Then verify with `boss --cdp-url http://localhost:9222 login --cdp`
-and `agent-reach doctor`. Do not make the user assemble CDP flags.
-Keep reusing the dedicated Chrome profile; do not recreate it for every run or
-switch to the user's daily profile by default. Search with
-`boss --browser-source existing-browser --cdp-url http://localhost:9222 search ...`.
-On `ENVIRONMENT_RISK`, stop without refreshing, relogging, or retrying.
+{{CHANNEL_TABLE}}
 
-**Do not trust `boss status` for CDP browser login state** — it only validates the
-local `~/.boss-agent/auth/session.enc` store, which does not represent the
-dedicated Chrome profile's cookies that `existing-browser` searches actually use. Use
-the browser `wt2` cookie probe in `agent-reach doctor` plus the user's visual
-confirmation. Never judge login state from the page URL: `security-check` /
-`zhipin-security` / `_security_check` pages are anti-bot challenges that appear
-even when logged in. `AUTH_EXPIRED` from a search is the ground truth for a
-logged-out browser — go straight to the login flow + `login --cdp` instead of
-interpreting it as a security check.
+`default` channels are installed by default and can be removed; updates never add a removed one back. The `login` column is the authentication entry point, not a prerequisite for public content.
 
-## Discovering OpenCLI adapters
+## After installation
 
-When the routing table lacks a needed platform or command, run `opencli list`,
-then inspect `opencli <platform> --help`. Discovery proves only that an adapter
-exists, not that authentication or target content works. Run read-only commands
-only when the user's task requires that platform, and require non-empty content.
+After `agent-reach setup`, show `result.installation_report.markdown` to the user as is: no additions, removals, reordering, extra greeting or tables. The program generates it.
 
-## Workspace rules
+## When the user wants to manage Agent Reach
 
-Use the system or workspace-designated temporary directory and clean up this
-task's intermediate files. Use actual tool config directories for persistent
-settings; place deliverables according to the user's workspace rules. Never put
-cookies, API keys or browser data in skills, source control, logs or responses.
+| User says | You run |
+|---|---|
+| Add a platform | `agent-reach add <channel>`; dependencies install automatically. Tell the user only what they must do (log in or provide a key) |
+| Remove a platform | `agent-reach remove <channel>` |
+| Log in / login expired | `agent-reach login <channel>`; the user logs in themselves in the window that opens |
+| Log out | `agent-reach logout <channel>` |
+| Status / what works | `agent-reach doctor --text`; for a live test `agent-reach check <channel> --text` |
+| Upgrade / update | `agent-reach update` |
+| Uninstall | show `agent-reach uninstall --dry-run` first, then `agent-reach uninstall` once they confirm |
+| Another AI should use it | `agent-reach skill link <that AI's skills folder>`; `agent-reach skill` shows where it is placed now |
 
-## Detailed references
+Troubleshooting, browser maintenance and uninstall details are in [Maintenance](references/maintenance.md): read it when an update fails, the browser will not start, or the user wants to uninstall.
 
-Read the matching file when you need specifics (commands above cover the
-common cases; references hold per-backend command groups, caveats, retry
-chains — note: reference docs are written in Chinese, commands are universal):
+## When there is a new version
 
-- [Search](references/search.md) — built-in/external search and result validation
-- [Social](references/social.md) — XiaoHongShu, Twitter, Bilibili, V2EX, Reddit, Facebook, Instagram (multi-backend/login-backed groups)
-- [Career](references/career.md) — LinkedIn
-- [Dev](references/dev.md) — GitHub CLI
-- [Web](references/web.md) — built-in reading, Firecrawl, TinyFish Fetch, host browser, RSS
-- [Video](references/video.md) — YouTube, Bilibili, Xiaoyuzhou
-- [Finance](references/finance.md) — Xueqiu quotes, search and market content
+Any result with `meta.update` means a newer version exists. Mention it once per conversation, in the user's language and plain words:
 
-## Configure a channel
+1. Agent Reach has a new version (`meta.update.latest`).
+2. What changed: 1 to 3 short points from `meta.update.notes`.
+3. Ask whether to update; run `agent-reach update` only after the user agrees.
 
-If a channel needs setup, fetch the install guide:
-https://raw.githubusercontent.com/binawoh/Agent-Reach/main/docs/install.md
+## Red lines
 
-The user only provides cookies / one extension click; the agent does the rest.
+- Read only. Never post, comment, like or message.
+- Never log in for the user; never ask for or print passwords, cookies or other credentials.
+- Ordinary queries never change dependencies or update automatically.

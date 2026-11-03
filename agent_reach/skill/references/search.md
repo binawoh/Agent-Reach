@@ -7,7 +7,7 @@
 
 1. **先确定要找什么**：普通网页/刚发布的内容先用当前会话内置搜索；官方原文、技术文档、
    财报深入补充优先 Exa。最新官方公告兼具两类需求时，先找当期发布，再用官方正文核验。
-   用户要小红书/B站等站内体验、评论或视频时，直接按平台 reference 调用专用通道；
+   用户要小红书/B站等站内体验、评论或视频时，直接按 agent-reach channels 列出的动作调用专用通道；
    普通网页的转载可作线索，不能冒充原帖。已有具体 URL 时按 [网页阅读](web.md) 读取。
 2. **确认可调用**：以当前工具列表、公开 schema、CLI help 和本机认证为准。
    内置搜索直接使用宿主提供的接口，不要求另外配置 OpenAI/Anthropic API key，
@@ -115,6 +115,6 @@ mcporter call exa.web_search_exa query="library API code example" objective="Fin
 ```
 
 > Exa MCP 的 `get_code_context_exa` 已弃用且默认不注册。代码问题也使用
-> `web_search_exa`；需要精确搜索仓库内容时，改用 `dev.md` 中的 GitHub 搜索。
+> `web_search_exa`；需要精确搜索仓库内容时，使用 GitHub CLI 或当前环境提供的 GitHub 搜索。
 
-具体平台使用对应 reference。未列出的搜索服务只有在当前环境实际提供、符合任务与费用限制时才使用。
+具体平台参阅[能力边界](capabilities.md)。未列出的搜索服务只有在当前环境实际提供、符合任务与费用限制时才使用。

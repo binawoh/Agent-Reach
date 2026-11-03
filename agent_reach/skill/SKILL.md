@@ -5,14 +5,17 @@ description: >
   平台专用通道、正文抓取或宿主浏览器工具。适用于网页/新闻/官方资料查询、URL 阅读、
   小红书/B站/Twitter/Reddit 等站内内容、视频字幕和 RSS。
   只负责获取与核验内容，不负责发帖、评论等写操作；已有专门平台 skill 时优先使用它。
+  也适用于安装、查看状态、管理平台渠道和更新 Agent Reach。
 metadata:
   homepage: https://github.com/binawoh/Agent-Reach
+  version: "{{VERSION}}"
 ---
 
-# Agent Reach — 互联网能力路由器
+# Agent Reach
 
-本 skill 负责选择和组合互联网工具，Exa 等只是其中的后端。先按任务选择能力，
-再调用当前环境的公开接口；不把所有请求都交给同一个搜索引擎。
+一个命令读所有平台：`agent-reach`。只读，默认输出一行 JSON。
+
+动手前先说一句"用 agent-reach skill（X 渠道）"。本 skill 被调用后全程有效，以下规则一直适用。
 
 ## 费用限制
 
@@ -34,153 +37,90 @@ metadata:
 需要使用 Firecrawl CLI 时，未安装先安装，未认证先完成认证，验证通过后再搜索；具体见
 [Firecrawl CLI 准备](references/search.md#firecrawl-cli-准备)。不要仅因缺少 CLI 就跳过该后端。
 
-## 常驻规则（全程适用）
-
-1. **动手前先体检**：多后端/登录态平台（小红书/Reddit/B站/Twitter/Facebook/Instagram/Boss直聘）先跑
-   `agent-reach doctor --json`。`active_backend` 有值时按它选命令组；`active_backend: null`
-   表示 Doctor 为避免触发浏览器 Cookie 读取或远端写入而没有做实时验证，不代表后端不存在。
-   Doctor 结果是「某一时刻的快照」，通道/登录态可能已变化；执行只读命令前若怀疑失效，
-   按对应 reference 的「体检与恢复」runbook 重新确认（如 career.md 的 Boss直聘 CDP 排查）。
-2. **声明你在用什么**：开始干活前说一句「使用 agent-reach 的 X 平台 / Y 后端」。
-3. **失败按 references 里的重试链处理**，不要瞎猜命令。
-4. **按证据需要扩展**：全网调研先找原始资料；用户需要网友体验时再加入相关平台。
-   证据足够即可结束，不为凑工具数量重复搜索。只返回旧资料、无关结果或首页链接时，
-   即使命令成功，也要按 [搜索工具](references/search.md) 调整查询或换通道。
-5. **个人版本维护**：沿用个人仓库每周上游同步；本机更新按
-   [个人版本维护](references/personal-maintenance.md)。不在每次搜索后额外检查或安装更新。
-
 ## 路由表
 
-| 用户意图 | 首选能力 | 详细文档 |
-|---------|------|---------|
-| 普通网页搜索、刚发布的新闻/公告 | 当前 Agent 内置搜索；缺失或结果不足时用外部搜索 | [search](references/search.md) |
-| 官方原文、技术文档、财报深入补充 | Exa；必要时与内置搜索交叉核验 | [search](references/search.md) |
-| 已知 URL、正文或表格 | 内置读取可满足时直接用；完整抓取优先 Firecrawl | [web](references/web.md) |
-| 展开/翻页/交互后才能读到内容 | 宿主已有且不额外收费的浏览器工具 | [web](references/web.md) |
-| 小红书/推特/B站/V2EX/Reddit/Facebook/Instagram 站内内容 | 对应平台通道 | [social](references/social.md) |
-| 招聘/职位/LinkedIn/Boss直聘 | 对应平台通道 | [career](references/career.md) |
-| 精确查 GitHub 仓库/代码 | GitHub 工具 | [dev](references/dev.md) |
-| YouTube/B站/播客字幕 | 字幕或转录通道 | [video](references/video.md) |
-| 雪球/股票行情 | 对应行情或站内通道 | [finance](references/finance.md) |
-| RSS | feedparser | [web](references/web.md) |
+普通搜索和最新消息先用宿主搜索，官方原文、技术文档和财报优先用 Exa。精确查 GitHub 源码时用 GitHub 搜索。需要补充时按任务选 Tavily、Firecrawl Search 或免费 TinyFish Search。已知 URL 用宿主读取、Firecrawl 或免费 TinyFish Fetch，交互页面用宿主浏览器，RSS 用 feedparser。平台任务优先用已有的专门 skill。用户指定工具时优先使用，并说明实际采用的替代来源。详见[搜索工具](references/search.md)、[网页与 RSS](references/web.md)和[个人版本维护](references/personal-maintenance.md)。
 
-用户指定工具时优先执行指定工具；遇到不可用或结果不足，说明原因再补充其他来源，
-不得把备用结果冒充指定工具结果。Tavily 是外部搜索补充，Firecrawl Search 和 TinyFish
-Search 也可按需使用；这些搜索入口不等于正文抓取或浏览器 Agent。
+## 选路
 
-## 常用命令（先按上表选工具）
+- 公开内容先用你自带的搜索/读取工具（可加 `site:域名`）。正文、评论、字幕分别核对是否已拿到；够了就直接回答，不装渠道、不登录。
+- 自带工具不可用、结果缺了用户要的部分、或用户要的是渠道声明的站内动作时，再用 Reach。不确定有哪些动作和参数先跑 `agent-reach channels`。
+- 渠道已经加上（默认渠道或 `add` 过）时，搜索/阅读直接走该站工具；还没加的渠道，搜索/阅读先试免登录公开网页，结果里 `backend: public-web` 标明来源。`--backend public-web` 只查公开网页；`--backend <后端>` 指定站内工具。
+- 平台名或链接只用来认出来源，不自动触发安装或登录。
+- 摘要、页面壳、评论计数、字幕轨道列表不等于正文、评论或字幕本身，要分别说明。用户跳过登录时，已拿到的公开结果照样交付。
 
 ```bash
-# 可选 PowerShell 外部搜索助手：明确指定任务所需后端
-agent-search -Query "query" -Limit 5 -Provider exa
-
-# 指定后端（也支持 exa、tavily、firecrawl）
-agent-search -Query "query" -Limit 5 -Provider tinyfish
-
-# 抓取正文（先按 search.md 完成 CLI 安装与认证）
-firecrawl scrape "https://example.com/article" --format markdown --only-main-content
-
-# GitHub 搜索
-gh search repos "query" --sort stars --limit 10
-
-# YouTube 字幕（注意：B站不要用 yt-dlp，失败重试链见 video.md）
-yt-dlp --write-sub --write-auto-sub --skip-download -o "/tmp/%(id)s" "URL"
-
-# V2EX 热门
-curl -s "https://www.v2ex.com/api/topics/hot.json" -H "User-Agent: agent-reach/1.0"
-
-# B站搜索（bili-cli，无需登录）
-bili search "query" --type video -n 5
+agent-reach channels                      # 每个渠道的动作和参数
+agent-reach <渠道> <动作> [参数]          # 例：agent-reach xiaohongshu search "咖啡" --limit 5
+agent-reach read <链接>                   # 按链接自动选渠道
 ```
 
-## 需登录态的平台（按 doctor 的 active_backend 选命令）
+## 结果与错误
 
-Twitter 注意：`agent-reach configure twitter-cookies` 保存的 Cookie 只供
-`doctor` 检查配置是否齐全；`doctor` 不执行 `twitter status`，也不会设置当前
-Shell。直接运行 `twitter` 前，必须在子进程环境中显式提供
-`TWITTER_AUTH_TOKEN` 和 `TWITTER_CT0`，不得在日志或命令回显中暴露值。
+- `ok: true` → 内容在 `items`，每条有 `title / url / author / published_at / text`，原始数据在 `raw`。
+- `ok: false` → 看 `error.code`，照 `error.hint` 做：
 
-小红书注意：Agent Reach 不替用户登录，也不读取浏览器 Cookie。OpenCLI 只用
-用户已有且明确控制的 Chrome 会话；没有现成会话时不要自动登录，改用
-Cookie-Editor 手工导出后配置 xiaohongshu-mcp / 存量工具。
+| error.code | 怎么办 |
+|---|---|
+| `NEED_SETUP` | 缺依赖或密钥。按提示 `agent-reach add <渠道>`；要密钥时请用户本人提供，再 `agent-reach configure <key>` |
+| `NEED_LOGIN` | 保留已有结果，告诉用户需要登录；`agent-reach login <渠道>` 打开浏览器，由用户本人登录，你绝不代登、不要密码 |
+| `UPSTREAM_BROKEN` | 这个平台暂时有问题，`message` 是出错时的原话。用平台名告诉用户哪个平台暂时用不了、大概是什么原因，不说工具名；原话说明工具过时，才在用户同意后跑一次 `agent-reach update`；不循环重试 |
+| `TIMEOUT` | 看失败阶段和渠道状态（`agent-reach doctor --text`）；不反复重试、不反复开窗 |
+| `RATE_LIMITED` | 平台限流，Reach 已暂停该渠道；按 `retry_after_seconds` 等，不换后端 |
+| `PLATFORM_BLOCKED` | 平台要求验证（验证码/风控）。停下，请用户在官方页面处理；不换账号、不换后端 |
+| `BUSY` | 排队等了 2 分钟浏览器仍然满，或用户正开着登录窗口。过一会儿、或等用户说登好了再试；不关窗口、不切换配置 |
+| `NOT_FOUND` | 内容不存在，核对链接或 ID |
+| `BAD_INPUT` | 参数不对，跑 `agent-reach channels` 看用法 |
 
-Boss直聘配置触发：当用户说“帮我配 Boss直聘”时，先读取 `references/career.md`
-的 Boss 章节，然后在获得安装授权后运行
-`agent-reach install --env=local --system --channels=boss`。Agent 负责按系统启动
-只绑定 `127.0.0.1:9222` 的专用 Chrome；**拉起后第一步是暂停并让用户肉眼确认**
-窗口内是已登录状态（右上角有头像），未登录则让用户登录/扫码，用户确认后再运行
-`boss --cdp-url http://localhost:9222 login --cdp` 和 `agent-reach doctor` 验收。
-不要让用户自己研究端口参数。
-专用 Chrome profile 必须长期复用，不要每次创建，也不要默认改用日常主 Chrome。
+遇到 `PLATFORM_BLOCKED`、`RATE_LIMITED`、`NEED_LOGIN`、`BUSY` 就停止本次尝试，不换账号、后端或浏览器反复请求。网络失败或某台机器的失败不能说成"平台必须登录"。
 
-判断 CDP 浏览器登录态**不要信 `boss status`**（它只校验本地 session.enc，与
-浏览器登录态互不代表），以 `agent-reach doctor` 的浏览器 cookie 探测（wt2）
-为准，并配合用户肉眼确认。绝不用当前页 URL 判断登录态：
-`security-check` / `zhipin-security` / `_security_check` 安全校验页是 Boss 反爬挑战，
-与登录无关——已登录也会出现（带 CDP 调试端口的 Chrome 几乎必现）。看到它不要
-当成“未登录”，先跑 `agent-reach doctor` 看浏览器 cookie，再决定是否需要用户登录。
-搜索报 `AUTH_EXPIRED` 即浏览器未登录的 ground truth：直接走登录流程 + `login --cdp`，
-不要往安全校验方向解释。
+## 登录与专用浏览器
 
-执行搜索时必须使用
-`boss --browser-source existing-browser --cdp-url http://localhost:9222 search ...`；
-遇到 `ENVIRONMENT_RISK` 立即停止，不刷新、不重新登录、不自动重试。
+所有浏览器渠道共用一个专用浏览器（优先 CloakBrowser，装不上时用本机 Chrome），默认无头不弹窗，闲置 10 分钟自动关闭，下次调用自动重开。可以并行调用（包括子代理同时查）：同一平台最多同时 2 条，所有平台合计 4 条，多出来的自动排队；同一平台的两次搜索之间至少隔 10 秒。
 
-```bash
-# Twitter 搜索（twitter-cli 首选；失败重试链见 social.md）
-twitter search "query" -n 10
+第一次用某个网站时，如果用户的 Chrome 已连接 OpenCLI 扩展，程序会把该站登录自动复制一次到专用浏览器，之后一直复用；只复制该站，不动原浏览器。登录失效或没有可复制的来源时，才请用户本人 `agent-reach login <渠道>`。刷新、选来源、退出等细节见 [会话与专用浏览器](references/sessions.md)：用户要登录、退出、换账号，或遇到 `NEED_LOGIN` 时读它。
 
-# Reddit（无零配置路径：OpenCLI 或 rdt-cli，必须登录态）
-opencli reddit search "query" -f yaml   # 桌面
-rdt search "query" --limit 10            # 存量/服务器
+## 平台注意
 
-# 小红书（桌面首选 OpenCLI）
-opencli xiaohongshu search "query" -f yaml
+- 小红书 read 只返回文字描述，不要声称看懂了图片或视频。
+- Boss 直聘搜索结果 `salary_encoded=true` 时绝不猜薪资数字；read 职位链接拿详情里的可读薪资。
+- 各平台公开能做什么、Reach 补什么，见 [能力边界](references/capabilities.md)：用户问"能查什么/查得全吗"或要判断结果完整度时读它。
 
-# Facebook / Instagram（桌面 OpenCLI，复用浏览器登录态）
-opencli facebook search "query" -f yaml
-opencli facebook groups -f yaml
-opencli instagram search "query" -f yaml       # 搜用户
-opencli instagram user USERNAME -f yaml        # 读指定用户最近帖子
-```
+## 渠道
 
-## 环境检查
+{{CHANNEL_TABLE}}
 
-`agent-reach` 不在 PATH 时，发现实际包管理器、虚拟环境或入口路径后调用，
-不要假定某个 conda 环境名。只使用内置搜索时不需要运行此检查。
+`default` 是默认安装的渠道，也可以去掉，去掉后更新不会加回来。`login` 列是认证入口，不是查公开内容的前提。
 
-```bash
-# 检查可用 channel 与每个平台当前激活的后端
-agent-reach doctor --json
-```
+## 安装完成时
 
-## OpenCLI 适配器发现
+`agent-reach setup` 后，把 `result.installation_report.markdown` 原样展示给用户，不增删、不重排、不自己补问候或表格；报告由程序生成。
 
-路由表没有覆盖用户需要的平台或命令时，先用 `opencli list` 查已有适配器，再用
-`opencli <平台> --help` 查看公开命令。发现适配器只证明命令存在，不证明登录态或
-目标内容可用；仅在用户任务明确需要该平台时执行只读命令，并以实际非空内容验收。
+## 用户要管理 Agent Reach 时
 
-## 工作区规则
+| 用户说 | 你运行 |
+|---|---|
+| 加上某个平台 | `agent-reach add <渠道>`，依赖自动装好；只告诉用户他必须做的事（登录或提供密钥） |
+| 去掉某个平台 | `agent-reach remove <渠道>` |
+| 登录 / 登录过期 | `agent-reach login <渠道>`，由用户本人在打开的窗口里登录 |
+| 退出登录 | `agent-reach logout <渠道>` |
+| 看看状态 / 哪些能用 | `agent-reach doctor --text`；要实测跑 `agent-reach check <渠道> --text` |
+| 升级 / 更新 | `agent-reach update` |
+| 卸载 | 先 `agent-reach uninstall --dry-run` 给用户看，确认后 `agent-reach uninstall` |
+| 让另一个 AI 也能用 | `agent-reach skill link <那个 AI 的 skill 目录>`；`agent-reach skill` 查看现在放在哪 |
 
-临时输出使用当前系统临时目录或工作区指定的临时位置，结束后清理本次中间文件。
-持久配置使用工具实际配置目录；用户要求交付的文件按其工作区规则保存。
-Cookie、API key 和浏览器数据不得写入 skill、源码仓库、日志或回答。
+故障排查、浏览器维护和卸载细节见 [维护说明](references/maintenance.md)：更新失败、浏览器起不来或要卸载时读它。
 
-## 详细文档
+## 有新版本时
 
-根据用户需求，阅读对应的详细文档：
+结果里出现 `meta.update` 就说明有新版本。每次对话只提一次，用用户的语言、大白话：
 
-- [搜索工具](references/search.md) — 内置/外部搜索、结果验收与按需补充
-- [社交媒体](references/social.md) — 小红书, Twitter, B站, V2EX, Reddit, Facebook, Instagram（多后端/登录态命令组）
-- [职场招聘](references/career.md) — LinkedIn, Boss直聘
-- [开发工具](references/dev.md) — GitHub CLI
-- [网页阅读](references/web.md) — 内置读取、Firecrawl、TinyFish Fetch、宿主浏览器、RSS
-- [视频播客](references/video.md) — YouTube, B站, 小宇宙
-- [金融行情](references/finance.md) — 雪球股票行情、搜索、热门内容
+1. 告诉用户有新版本（`meta.update.latest`）。
+2. 从 `meta.update.notes` 挑 1 到 3 个要点说清改了什么。
+3. 问要不要更新；用户同意后才跑 `agent-reach update`。
 
-## 配置渠道
+## 红线
 
-如果某个 channel 需要配置，读取个人仓库的安装指南：
-https://raw.githubusercontent.com/binawoh/Agent-Reach/main/docs/install.md
-
-用户只需提供 cookies，其他配置由 agent 完成。
+- 只读。发帖、评论、点赞、私信一律不做。
+- 不替用户登录，不索要或输出密码、Cookie 等凭据。
+- 普通查询不改依赖、不自动更新。

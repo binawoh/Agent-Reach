@@ -10,6 +10,22 @@ import pytest
 ROOT = Path(__file__).resolve().parents[1]
 
 
+@pytest.mark.parametrize("lang", ["zh", "en"])
+def test_placed_skill_includes_personal_routes_and_current_channels(monkeypatch, lang):
+    from agent_reach.runtime import manage
+
+    monkeypatch.setenv("AGENT_REACH_LANG", lang)
+    manage.place_skill()
+    installed = manage.skill_dir()
+    text = (installed / "SKILL.md").read_text("utf-8")
+    assert text == manage.render_skill(lang)
+    for keyword in ("Exa", "Tavily", "Firecrawl", "TinyFish", "Agent Batch", "| reddit |"):
+        assert keyword in text
+    for name in ("search.md", "web.md", "personal-maintenance.md", "capabilities.md"):
+        assert f"(references/{name})" in text
+        assert (installed / "references" / name).is_file()
+
+
 def run_search(script):
     pwsh = shutil.which("pwsh")
     if not pwsh:

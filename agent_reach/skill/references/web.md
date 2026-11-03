@@ -12,7 +12,7 @@ TinyFish 只用免费 Search / Fetch，禁止 Agent、Agent Batch、Browser 及�
 | 指定 TinyFish、或补充另一种正文提取 | 免费 TinyFish Fetch |
 | 替代读取路径 | 可用且符合费用限制的 Jina Reader、web-reader MCP 等 |
 | 展开/翻页/点击后才出现目标内容 | 宿主已有且不额外收费的浏览器工具 |
-| 平台帖子/视频/行情 | 回到 social、video、finance 等专用 reference |
+| 平台帖子/视频/行情 | 参阅[能力边界](capabilities.md)，选择相应平台动作 |
 | RSS | feedparser |
 
 不要只看响应非空或文本长度：确认正文包含用户需要的段落、字段、表格和时间信息。
